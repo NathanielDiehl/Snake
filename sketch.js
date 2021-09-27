@@ -63,10 +63,27 @@ function move(s){
   s.removeFromBody();
 }
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  frameRate(5);
+function gameOver(s){
+  if(s.tail.x > windowWidth)
+    return true;
+  if(s.tail.x < 0)
+    return true;
+  if(s.tail.y > windowHeight)
+    return true;
+  if(s.tail.y < 0)
+    return true;
 
+  var ptr = s.head;
+
+  while(ptr.next != null){
+    if(s.tail.x == ptr.x && s.tail.y == ptr.y)
+      return true;
+    ptr = ptr.next;
+  }
+  return false;
+}
+
+function makeSnake(){
   snake = new body(200, 200);
   snake.addToBody(210, 200);
   snake.addToBody(220, 200);
@@ -75,16 +92,29 @@ function setup() {
   snake.addToBody(250, 200);
   snake.addToBody(260, 200);
   snake.addToBody(270, 200);
+}
 
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  frameRate(5);
+
+  makeSnake();
 }
 
 function draw() {
-  background(0);
-
   
-
-  drawSnake(snake);
-  move(snake);
+  if(!gameOver(snake)){
+    background(0);
+    drawSnake(snake);
+    move(snake);
+  }else{
+    background(250,0,0);
+    direction = [10,0];
+    alert("Game Over");
+    background(0);
+    makeSnake();
+  }
 }
 
 function keyPressed() {
