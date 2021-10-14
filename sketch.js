@@ -1,5 +1,13 @@
-var snake;
+var WIDTH;
+var HEIGHT;
 
+const NUM_FOOD = 10;
+const PIXEL_WIDTH = 10;
+const START_LENGTH = 6;
+const FRAME_RATE = 5;
+
+var foods = {};
+var snake;
 var direction = [10,0];
 
 class cell{
@@ -44,7 +52,54 @@ class body{
     this.count--;
   }
 
+  getLength(){
+    var p=this.head;
+    var l = 1;
+    while(p.next != null){
+      p = p.next;
+      l++;
+    }
+    return l;
+  }
+
 }
+
+class food{
+  constructor(x,y){
+    this.x = x;
+    this.y = y;
+  }
+}
+
+function placeFood(){
+  return new food(int(random(WIDTH)/PIXEL_WIDTH)*PIXEL_WIDTH, int(random(HEIGHT)/PIXEL_WIDTH)*PIXEL_WIDTH);
+
+}
+
+function placeFoods(f){
+  for(var i = 0; i < NUM_FOOD; i++){
+    f[i] = placeFood();
+  }
+}
+
+function drawFoods(f){
+  fill(200,200, 0);
+    
+  for(var i = 0; i < NUM_FOOD; i++){
+    ellipse(f[i].x, f[i].y, PIXEL_WIDTH, PIXEL_WIDTH);
+  }
+}
+
+function eatFood(s, f){
+  for(var i = 0; i < NUM_FOOD; i++){
+    if(s.tail.x == f[i].x && s.tail.y == f[i].y){
+      s.addToBody(s.tail.x + direction[0], s.tail.y + direction[1]);
+      f[i] = placeFood();
+      return;
+    }
+  }
+}
+
 
 function drawSnake(b){
   var ptr = b.head;
@@ -64,11 +119,11 @@ function move(s){
 }
 
 function gameOver(s){
-  if(s.tail.x > windowWidth)
+  if(s.tail.x > WIDTH)
     return true;
   if(s.tail.x < 0)
     return true;
-  if(s.tail.y > windowHeight)
+  if(s.tail.y > HEIGHT)
     return true;
   if(s.tail.y < 0)
     return true;
@@ -85,33 +140,33 @@ function gameOver(s){
 
 function makeSnake(){
   snake = new body(200, 200);
-  snake.addToBody(210, 200);
-  snake.addToBody(220, 200);
-  snake.addToBody(230, 200);
-  snake.addToBody(240, 200);
-  snake.addToBody(250, 200);
-  snake.addToBody(260, 200);
-  snake.addToBody(270, 200);
+  for(var i = 1; i <= START_LENGTH; i++){
+    snake.addToBody(200 + i*direction[0], 200 + i*direction[1]);
+  }
 }
 
-
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  frameRate(5);
+  WIDTH = windowWidth;
+  HEIGHT = windowHeight;
+  createCanvas(WIDTH, HEIGHT);
+  frameRate(FRAME_RATE);
 
   makeSnake();
+  placeFoods(foods);
 }
 
 function draw() {
   
   if(!gameOver(snake)){
     background(0);
+    drawFoods(foods);
     drawSnake(snake);
     move(snake);
+    eatFood(snake, foods);
   }else{
     background(250,0,0);
     direction = [10,0];
-    alert("Game Over");
+    alert("Game Over" + "\nScore: " + (snake.getLength() - START_LENGTH));
     background(0);
     makeSnake();
   }
